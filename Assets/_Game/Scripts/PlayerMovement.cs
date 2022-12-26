@@ -7,19 +7,47 @@ public class PlayerMovement : MonoBehaviour
 
     private float currentSpeed;
     private bool isRunning;
-    private InputManager inputManager;
     private Vector2 movement;
+
+    private PlayerInputActions playerInput;
 
     private void Awake()
     {
-        inputManager = InputManager.Instance;
+        playerInput = new PlayerInputActions();
     }
 
-    void Update()
+    private void OnEnable()
     {
-        movement = inputManager.GetPlayerMovement();
-        isRunning = inputManager.GetPlayerRun();
-        currentSpeed = isRunning ? runSpeed : walkSpeed;
+        playerInput.Player.Enable();
+        playerInput.Player.Move.performed += Move_performed;
+        playerInput.Player.Move.canceled += Move_performed;
+        playerInput.Player.Run.performed += Run_performed;
+        playerInput.Player.Run.canceled += Run_performed;
+    }
+
+    private void Update()
+    {
         transform.position += (Vector3)movement * Time.deltaTime * currentSpeed;
+    }
+
+    private void OnDisable()
+    {
+        playerInput.Player.Disable();
+        playerInput.Player.Move.performed -= Move_performed;
+        playerInput.Player.Move.canceled -= Move_performed;
+        playerInput.Player.Run.performed -= Run_performed;
+        playerInput.Player.Run.canceled -= Run_performed;
+    }
+
+    private void Move_performed(UnityEngine.InputSystem.InputAction.CallbackContext input)
+    {
+        movement = input.ReadValue<Vector2>();
+        currentSpeed = isRunning ? runSpeed : walkSpeed;
+    }
+
+    private void Run_performed(UnityEngine.InputSystem.InputAction.CallbackContext input)
+    {
+        isRunning = input.ReadValue<float>() >= 0.5f;
+        currentSpeed = isRunning ? runSpeed : walkSpeed;
     }
 }

@@ -97,11 +97,19 @@ public class TilemapSpawner : MonoBehaviour
 
     public void DespawnObjects()
     {
-        while (activeObjects.Count > 0)
+        for (int i = activeObjects.Count - 1; i > 0; i--)
         {
-            for (int i = 0; i < activeObjects.Count; i++)
+            var obj = activeObjects[i];
+            if (obj != null)
             {
-                pool.Release(activeObjects[i]);
+                if (obj.activeSelf == true)
+                {
+                    pool.Release(activeObjects[i]);
+                }
+            }
+            else
+            {
+                continue;
             }
         }
     }
@@ -111,9 +119,9 @@ public class TilemapSpawner : MonoBehaviour
         var amountToSpawn = Random.Range(amountToSpawnMin, amountToSpawnMax + 1);
         for (int i = 0; i < amountToSpawn; i++)
         {
-            if(availableSpawnLocations.Count > 0)
+            AddSpawnLocations();
+            if (availableSpawnLocations.Count > 0)
             {
-                AddSpawnLocations();
                 if (useObjectPool)
                 {
                     pool.Get();
